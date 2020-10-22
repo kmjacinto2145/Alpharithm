@@ -22,9 +22,9 @@ def initialize(context):
     context.prediction = 0 # Stores most recent prediction
     # # # ML INIT
 
-    
-    schedule_function(handle_data, date_rules.every_day(), time_rules.market_open())        
     context.longed = False
+    schedule_function(handle_data, date_rules.every_day(), time_rules.market_open())        
+
     
 
 def vwap(prices, volumes):
@@ -88,8 +88,10 @@ def handle_data(context, data):
             if std_30 > 0:
                 if obv_d1_norm + vwap_norm > 0.5 and context.longed is False:
                     signal = 0.75*int(context.prediction) + 0.25
+                    context.longed = True
                 elif obv_d1_norm + vwap_norm < -0.5 and context.longed is True:
                     signal = 0.75*int(context.prediction) - 0.25
+                    context.longed = False
 
             buy_signal = context.prediction + int(context.prediction)
             try:
