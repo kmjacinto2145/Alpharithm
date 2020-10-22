@@ -93,7 +93,6 @@ def handle_data(context, data):
                     signal = 0.75*int(context.prediction) - 0.25
                     context.longed = False
 
-            buy_signal = context.prediction + int(context.prediction)
             try:
                 order_target_percent(spy, signal)
             except:
