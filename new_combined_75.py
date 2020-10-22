@@ -2,18 +2,18 @@ from sklearn.ensemble import RandomForestClassifier
 from collections import deque
 import talib  
 import numpy as np
-
+ 
 def initialize(context):
     set_long_only()
     set_max_order_count(1)
     context.spy = sid(8554)
     
-
-
+ 
+ 
     # # # ML INIT
     context.security = sid(19920) # QQQ
     context.window_length = 20 # Amount of prior bars to study, originally 10
-
+ 
     context.classifier = RandomForestClassifier() # Use a random forest classifier
     # deques are lists with a maximum length where old entries are shifted out
     context.recent_prices = deque(maxlen=context.window_length+2) # Stores recent prices
@@ -21,15 +21,15 @@ def initialize(context):
     context.Y = deque(maxlen=500) # Dependent, or output variable
     context.prediction = 0 # Stores most recent prediction
     # # # ML INIT
-
+ 
     context.longed = False
     schedule_function(handle_data, date_rules.every_day(), time_rules.market_open())        
-
+ 
     
-
+ 
 def vwap(prices, volumes):
     return (prices * volumes).sum() / volumes.sum()
-
+ 
 def vwap_std(prices, volumes, bar_count):
     deviation_sum = 0
     
@@ -37,8 +37,8 @@ def vwap_std(prices, volumes, bar_count):
         deviation_sum += (prices[day] - vwap(prices, volumes)) ** 2
         
     return (1/(bar_count - 1) * deviation_sum) ** (1/2)
-
-
+ 
+ 
 def handle_data(context, data):  
     spy = context.spy    
     bar_count = 30
@@ -63,7 +63,7 @@ def handle_data(context, data):
     
     print(vwap_norm)
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-
+ 
     
     # # # # # # # # # # # # # # # # # # # # # # # # 
     # ML STUFF
@@ -81,7 +81,7 @@ def handle_data(context, data):
             # If prediction = 1, buy all shares affordable, if 0 sell all shares
             context.security = sid(8554) #change back to SPY
             # order_target_percent(context.security, int(context.prediction))
-
+ 
     # # # # # # # # # # # # # # # # # # # # # # # # 
     # Michael's Stuff
             signal = 0.75*int(context.prediction)
@@ -92,7 +92,7 @@ def handle_data(context, data):
                 elif obv_d1_norm + vwap_norm < -0.5 and context.longed is True:
                     signal = 0.75*int(context.prediction) - 0.25
                     context.longed = False
-
+ 
             try:
                 order_target_percent(spy, signal)
             except:
@@ -100,7 +100,7 @@ def handle_data(context, data):
                     
             context.security = sid(19920) #track QQQ again ## ML
     # # # # # # # # # # # # # # # # # # # # # # # # 
-
+ 
     
     record(vwap_norm = vwap_norm)
     record(obv_d1_norm = obv_d1_norm)
