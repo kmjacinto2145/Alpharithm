@@ -86,6 +86,7 @@ def handle_data(context, data):
     # Michael's Stuff
             signal = 0.75*int(context.prediction)
             if std_30 > 0:
+                # Add to signal
                 if obv_d1_norm + vwap_norm > 0.5 and context.longed is False:
                     signal += 0.25
                     context.longed = True
@@ -93,6 +94,9 @@ def handle_data(context, data):
                     if (signal != 0):
                         signal -= 0.25
                     context.longed = False
+            else:
+                if (signal != 0):
+                    signal -= 0.25
 
             try:
                 order_target_percent(spy, signal)
